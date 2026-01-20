@@ -1,0 +1,26 @@
+[package]
+name = "ignition"
+version = "1.0.0"
+edition = "2024"
+links = "ignition_sys"
+
+[lib]
+name = "ignition"
+crate-type = ["lib"]
+doctest = false
+test = false
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.137"
+thiserror = "1.0"
+
+[build-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.137"
+thiserror = "1.0"
+
+[features]
+default = ["opencv"]
+onnxruntime = []
+opencv = []

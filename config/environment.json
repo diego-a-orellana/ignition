@@ -1,0 +1,12 @@
+{
+    "opencv": {
+        "contents": [
+            "opencv/lib",
+            "opencv/opencv4"
+        ],
+        "environment": {
+            "opencv/lib": "OPENCV_LINK_PATHS",
+            "opencv/opencv4": "OPENCV_INCLUDE_PATHS"
+        }
+    }
+}

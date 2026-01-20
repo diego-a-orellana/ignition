@@ -1,0 +1,106 @@
+{
+    "android": {
+        "build": [
+            {
+                "architecture": "armv7",
+                "architecture_alias": "armeabi-v7a",
+                "environment": "",
+                "environment_alias": "",
+                "variant": "",
+                "variant_alias": ""
+            },
+            {
+                "architecture": "aarch64",
+                "architecture_alias": "arm64-v8a",
+                "environment": "",
+                "environment_alias": "",
+                "variant": "",
+                "variant_alias": ""
+            },
+            {
+                "architecture": "i686",
+                "architecture_alias": "x86",
+                "environment": "",
+                "environment_alias": "",
+                "variant": "",
+                "variant_alias": ""
+            },
+            {
+                "architecture": "x86_64",
+                "architecture_alias": "x86_64",
+                "environment": "",
+                "environment_alias": "",
+                "variant": "",
+                "variant_alias": ""
+            }
+        ]
+    },
+    "ios": {
+        "build": [
+            {
+                "architecture": "aarch64",
+                "architecture_alias": "arm64",
+                "environment": "",
+                "environment_alias": "os",
+                "variant": "",
+                "variant_alias": ""
+            },
+            {
+                "architecture": "aarch64",
+                "architecture_alias": "arm64",
+                "environment": "sim",
+                "environment_alias": "simulator",
+                "variant": "",
+                "variant_alias": ""
+            },
+            {
+                "architecture": "x86_64",
+                "architecture_alias": "x86_64",
+                "environment": "",
+                "environment_alias": "simulator",
+                "variant": "",
+                "variant_alias": ""
+            }
+        ]
+    },
+    "darwin": {
+        "build": [
+            {
+                "architecture": "aarch64",
+                "architecture_alias": "arm64",
+                "environment": "",
+                "environment_alias": "",
+                "variant": "",
+                "variant_alias": ""
+            }
+        ]
+    },
+    "linux": {
+        "build": [
+            {
+                "architecture": "aarch64",
+                "architecture_alias": "arm64",
+                "environment": "gnu",
+                "environment_alias": "",
+                "variant": "35",
+                "variant_alias": "jetpack5"
+            },
+            {
+                "architecture": "aarch64",
+                "architecture_alias": "arm64",
+                "environment": "gnu",
+                "environment_alias": "",
+                "variant": "36",
+                "variant_alias": "jetpack6"
+            },
+            {
+                "architecture": "x86_64",
+                "architecture_alias": "x86_64",
+                "environment": "gnu",
+                "environment_alias": "",
+                "variant": "",
+                "variant_alias": ""
+            }
+        ]
+    }
+}
