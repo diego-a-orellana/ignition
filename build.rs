@@ -73,7 +73,6 @@ fn main() {
 
     // env vars
     let var_bucket_url = var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error");
-    println!("cargo:warning=IGNITION_BUCKET_URL: {}", var_bucket_url);
     let var_cache_path = var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string());
     let var_directory_path =
         var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string());
