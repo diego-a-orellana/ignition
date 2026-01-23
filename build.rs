@@ -12,21 +12,52 @@ const DEFAULT_DIRECTORY_PATH: &str = "assets/dependencies";
 include!("src/lib.rs");
 
 /// Entry point for all asset retrieval and environment variable setting
-fn asset(var_bucket_url: &str, build_dir: &str, var_cache_path: &str, var_directory_path: &str, target: &str) {
+fn asset(
+    var_bucket_url: &str,
+    build_dir: &str,
+    var_cache_path: &str,
+    var_directory_path: &str,
+    target: &str,
+) {
     asset_script();
 
-    #[cfg(feature = "opencv")]
+    #[cfg(feature = "download-opencv")]
     #[allow(clippy::needless_borrow)]
-    asset_opencv(&var_bucket_url, &build_dir, &var_cache_path, &var_directory_path, &target);
+    asset_opencv(
+        &var_bucket_url,
+        &build_dir,
+        &var_cache_path,
+        &var_directory_path,
+        &target,
+    );
 
-    #[cfg(feature = "onnxruntime")]
+    #[cfg(feature = "download-onnxruntime")]
     #[allow(clippy::needless_borrow)]
-    asset_onnxruntime(&var_bucket_url, &build_dir, &var_cache_path, &var_directory_path, &target);
+    asset_onnxruntime(
+        &var_bucket_url,
+        &build_dir,
+        &var_cache_path,
+        &var_directory_path,
+        &target,
+    );
 }
 
 /// Retrieve OpenCV asset and set environment variables
-fn asset_opencv(var_bucket_url: &str, build_dir: &str, cache_path: &str, directory_path: &str, target: &str) {
-    asset_retrieve(var_bucket_url, "opencv", build_dir, cache_path, directory_path, target);
+fn asset_opencv(
+    var_bucket_url: &str,
+    build_dir: &str,
+    cache_path: &str,
+    directory_path: &str,
+    target: &str,
+) {
+    asset_retrieve(
+        var_bucket_url,
+        "opencv",
+        build_dir,
+        cache_path,
+        directory_path,
+        target,
+    );
     let _ = environment_variables(
         "opencv",
         Some(&std::path::Path::new(&build_dir).join(directory_path)),
@@ -35,7 +66,13 @@ fn asset_opencv(var_bucket_url: &str, build_dir: &str, cache_path: &str, directo
 
 /// Future: onnxruntime asset retrieval (+ environment variable setting?)
 #[allow(dead_code, unused_variables)]
-fn asset_onnxruntime(var_bucket_url: &str, build_dir: &str, cache_path: &str, directory_path: &str, target: &str) {
+fn asset_onnxruntime(
+    var_bucket_url: &str,
+    build_dir: &str,
+    cache_path: &str,
+    directory_path: &str,
+    target: &str,
+) {
     todo!();
 }
 
@@ -49,7 +86,14 @@ fn asset_retrieve(
     target: &str,
 ) {
     let mut output = Command::new(ASSET_SCRIPT_PATH)
-        .args([var_bucket_url, asset, build_dir, cache_path, directory_path, target])
+        .args([
+            var_bucket_url,
+            asset,
+            build_dir,
+            cache_path,
+            directory_path,
+            target,
+        ])
         .spawn()
         .expect("asset.sh command failed to start");
     let _ = output.wait().expect("asset.sh command failed to complete");
@@ -72,7 +116,8 @@ fn main() {
     println!("cargo:rerun-if-changed=NULL");
 
     // env vars
-    let var_bucket_url = var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error");
+    let var_bucket_url =
+        var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error");
     let var_cache_path = var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string());
     let var_directory_path =
         var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string());
@@ -86,8 +131,14 @@ fn main() {
 
     // retrieve assets and set environment variables (note: target exclusion)
     #[cfg(all(
-        any(feature = "opencv", feature = "onnxruntime"),
+        any(feature = "download-opencv", feature = "download-onnxruntime"),
         not(all(target_arch = "aarch64", target_os = "linux"))
     ))]
-    asset(&var_bucket_url, build_dir, &var_cache_path, &var_directory_path, &target);
+    asset(
+        &var_bucket_url,
+        build_dir,
+        &var_cache_path,
+        &var_directory_path,
+        &target,
+    );
 }
