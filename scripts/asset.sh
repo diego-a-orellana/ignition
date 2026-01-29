@@ -33,12 +33,12 @@ CFG=$(cat $SCRIPT_DIR/config/target.json | jq)
 # ------------------------------
 
 function check_remote_data() {
-    # silence output of wget, check for 200
-    if [[ $(wget -S --spider $1  2>&1 | grep 'HTTP/1.1 200 OK') ]]; then
-        echo 1
-    else
-        echo 0
-    fi
+    local url=$1
+    local output
+    output=$(wget -S --spider --max-redirect=5 "$url" 2>&1)
+    local status=$?
+    echo "$output" >&2
+    return $status
 }
 
 function directory_create_recursive() {
@@ -67,7 +67,7 @@ function operating_system() {
 function remote_data() {
     local url=$1
     local path=$2
-    if [[ $(check_remote_data "$url") == 0 ]]; then
+    if ! check_remote_data "$url"; then
         echo "--invalid url: $url"
         exit 1
     fi
