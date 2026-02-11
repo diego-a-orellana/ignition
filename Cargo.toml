@@ -21,7 +21,7 @@ serde_json = "1.0.137"
 thiserror = "1.0"
 
 [features]
-default = ["download-opencv"]
+default = ["download-onnxruntime", "download-opencv"]
 download-onnxruntime = []
 download-opencv = []
 

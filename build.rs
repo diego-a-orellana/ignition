@@ -43,6 +43,7 @@ fn asset(
 }
 
 /// Retrieve OpenCV asset and set environment variables
+#[cfg(feature = "download-opencv")]
 fn asset_opencv(
     var_bucket_url: &str,
     build_dir: &str,
@@ -65,7 +66,7 @@ fn asset_opencv(
 }
 
 /// Retrieve Onnruuntime asset and set environment variable
-#[allow(dead_code, unused_variables)]
+#[cfg(feature = "download-onnxruntime")]
 fn asset_onnxruntime(
     var_bucket_url: &str,
     build_dir: &str,
