@@ -11,10 +11,10 @@
     },
     "onnxruntime": {
         "contents": [
-            "onnxruntime/lib"
+            "onnxruntime"
         ],
         "environment": {
-            "onnxruntime/lib": "ORT_LIB_LOCATION"
+            "onnxruntime": "ORT_LIB_LOCATION"
         }
     }
 }
