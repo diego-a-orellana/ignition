@@ -6,7 +6,7 @@ if [[ "$1" == "--help" ]]; then
     echo "Usage: $0 [bucket-url] [asset] [root] [cache] [directory] [target-triplet] [variant](optional)"
     echo ""
     echo "  bucket-url: base of target-specific asset url"
-    echo "  asset: the asset to retrieve (e.g. 'opencv', 'onnxruntime', 'roc')"
+    echo "  asset: the asset to retrieve (e.g. 'opencv', 'onnxruntime', etc.)"
     echo "      (assumes archive file <asset>.tar.gz)"
     echo "  root: the base path to <cache> and <directory>"
     echo "  cache: the relative path for storing asset and target-specific archive files"

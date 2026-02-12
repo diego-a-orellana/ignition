@@ -43,6 +43,7 @@ fn asset(
 }
 
 /// Retrieve OpenCV asset and set environment variables
+#[cfg(feature = "download-opencv")]
 fn asset_opencv(
     var_bucket_url: &str,
     build_dir: &str,
@@ -64,8 +65,8 @@ fn asset_opencv(
     );
 }
 
-/// Future: onnxruntime asset retrieval (+ environment variable setting?)
-#[allow(dead_code, unused_variables)]
+/// Retrieve Onnruuntime asset and set environment variable
+#[cfg(feature = "download-onnxruntime")]
 fn asset_onnxruntime(
     var_bucket_url: &str,
     build_dir: &str,
@@ -73,7 +74,18 @@ fn asset_onnxruntime(
     directory_path: &str,
     target: &str,
 ) {
-    todo!();
+    asset_retrieve(
+        var_bucket_url,
+        "onnxruntime",
+        build_dir,
+        cache_path,
+        directory_path,
+        target,
+    );
+    let _ = environment_variables(
+        "onnxruntime",
+        Some(&std::path::Path::new(&build_dir).join(directory_path)),
+    );
 }
 
 /// Retrieve an asset by name using the asset.sh script

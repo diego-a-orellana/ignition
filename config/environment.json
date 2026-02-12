@@ -8,5 +8,13 @@
             "opencv/lib": "OPENCV_LINK_PATHS",
             "opencv/opencv4": "OPENCV_INCLUDE_PATHS"
         }
+    },
+    "onnxruntime": {
+        "contents": [
+            "onnxruntime"
+        ],
+        "environment": {
+            "onnxruntime": "ORT_LIB_LOCATION"
+        }
     }
 }
