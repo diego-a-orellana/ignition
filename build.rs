@@ -127,13 +127,6 @@ fn main() {
     // force re-run by pointing to a non-existent file
     println!("cargo:rerun-if-changed=NULL");
 
-    // env vars
-    let var_bucket_url =
-        var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error");
-    let var_cache_path = var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string());
-    let var_directory_path =
-        var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string());
-
     // require definition and format: /../target/<target-triplet>/<build-type>/build/<ignition-build-id>/out
     let out_dir = var("OUT_DIR").unwrap();
     let build_dir = out_dir.split(&"/build".to_string()).next().unwrap();
@@ -142,15 +135,14 @@ fn main() {
     let target = std::env::var("TARGET").unwrap_or("".to_string());
 
     // retrieve assets and set environment variables (note: target exclusion)
-    #[cfg(all(
-        any(feature = "download-opencv", feature = "download-onnxruntime"),
-        not(all(target_arch = "aarch64", target_os = "linux"))
-    ))]
-    asset(
-        &var_bucket_url,
-        build_dir,
-        &var_cache_path,
-        &var_directory_path,
-        &target,
-    );
+    #[cfg(any(feature = "download-opencv", feature = "download-onnxruntime"))]
+    if !(target.starts_with("aarch64-") && target.contains("linux")) {
+        asset(
+            &var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error"),
+            build_dir,
+            &var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string()),
+            &var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string()),
+            &target,
+        );
+    }
 }
