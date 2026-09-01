@@ -136,7 +136,7 @@ fn main() {
 
     // retrieve assets and set environment variables (note: target exclusion)
     #[cfg(any(feature = "download-opencv", feature = "download-onnxruntime"))]
-    if !(target.starts_with("aarch64-") && target.contains("linux")) {
+    if !(target.starts_with("aarch64-") && target.ends_with("linux-gnu")) {
         asset(
             &var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error"),
             build_dir,
