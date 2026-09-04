@@ -12,6 +12,7 @@ const DEFAULT_DIRECTORY_PATH: &str = "assets/dependencies";
 include!("src/lib.rs");
 
 /// Entry point for all asset retrieval and environment variable setting
+/// Note: target exclusion for OpenCV, aarch64-linux-gnu
 fn asset(
     var_bucket_url: &str,
     build_dir: &str,
@@ -23,13 +24,15 @@ fn asset(
 
     #[cfg(feature = "download-opencv")]
     #[allow(clippy::needless_borrow)]
-    asset_opencv(
-        &var_bucket_url,
-        &build_dir,
-        &var_cache_path,
-        &var_directory_path,
-        &target,
-    );
+    if !(target.starts_with("aarch64-") && target.ends_with("linux-gnu")) {
+        asset_opencv(
+            &var_bucket_url,
+            &build_dir,
+            &var_cache_path,
+            &var_directory_path,
+            &target,
+        );
+    }
 
     #[cfg(feature = "download-onnxruntime")]
     #[allow(clippy::needless_borrow)]
@@ -134,15 +137,12 @@ fn main() {
     // parse target
     let target = std::env::var("TARGET").unwrap_or("".to_string());
 
-    // retrieve assets and set environment variables (note: target exclusion)
-    #[cfg(any(feature = "download-opencv", feature = "download-onnxruntime"))]
-    if !(target.starts_with("aarch64-") && target.ends_with("linux-gnu")) {
-        asset(
-            &var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error"),
-            build_dir,
-            &var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string()),
-            &var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string()),
-            &target,
-        );
-    }
+    // retrieve assets and set environment variables
+    asset(
+        &var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error"),
+        build_dir,
+        &var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string()),
+        &var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string()),
+        &target,
+    );
 }
