@@ -3,115 +3,70 @@
 // This crate performs pre-compilation asset retrieval and cargo metadata setting.
 // During runtime of a dependent `build.rs`, this crate will retrieve cargo metadata and export environment variables.
 //
-use std::{env::var, process::Command};
-
-const ASSET_SCRIPT_PATH: &str = "scripts/asset.sh";
-const DEFAULT_CACHE_PATH: &str = "cache";
-const DEFAULT_DIRECTORY_PATH: &str = "assets/dependencies";
+use std::process::Command;
 
 include!("src/lib.rs");
 
-/// Entry point for all asset retrieval and environment variable setting
-/// Note: target exclusion for OpenCV, aarch64-linux-gnu
-fn asset(
-    var_bucket_url: &str,
-    build_dir: &str,
-    var_cache_path: &str,
-    var_directory_path: &str,
-    target: &str,
-) {
+/// Entry point for asset retrieval and environment variable setting
+fn asset(config: Config) -> IgnitionResult<()> {
     asset_script();
 
     #[cfg(feature = "download-opencv")]
-    #[allow(clippy::needless_borrow)]
-    if !(target.starts_with("aarch64-") && target.ends_with("linux-gnu")) {
-        asset_opencv(
-            &var_bucket_url,
-            &build_dir,
-            &var_cache_path,
-            &var_directory_path,
-            &target,
-        );
-    }
+    asset_opencv(&config)?;
 
     #[cfg(feature = "download-onnxruntime")]
-    #[allow(clippy::needless_borrow)]
-    asset_onnxruntime(
-        &var_bucket_url,
-        &build_dir,
-        &var_cache_path,
-        &var_directory_path,
-        &target,
-    );
+    asset_onnxruntime(&config)?;
+
+    Ok(())
 }
 
 /// Retrieve OpenCV asset and set environment variables
 #[cfg(feature = "download-opencv")]
 fn asset_opencv(
-    var_bucket_url: &str,
-    build_dir: &str,
-    cache_path: &str,
-    directory_path: &str,
-    target: &str,
-) {
-    asset_retrieve(
-        var_bucket_url,
-        "opencv",
-        build_dir,
-        cache_path,
-        directory_path,
-        target,
-    );
-    let _ = environment_variables(
-        "opencv",
-        Some(&std::path::Path::new(&build_dir).join(directory_path)),
-    );
+    config: &Config,
+) -> IgnitionResult<()> {
+    let asset = OpenCv::new();
+    if !asset.check_target_excluded(config) {
+        let _ = asset_retrieve(&asset, config)?;
+        let _ = environment_variables(&asset, Some(&config))?;
+    }
+    Ok(())
 }
 
-/// Retrieve Onnruuntime asset and set environment variable
+/// Retrieve Onnxruntime asset and set environment variable
 #[cfg(feature = "download-onnxruntime")]
-fn asset_onnxruntime(
-    var_bucket_url: &str,
-    build_dir: &str,
-    cache_path: &str,
-    directory_path: &str,
-    target: &str,
-) {
-    asset_retrieve(
-        var_bucket_url,
-        "onnxruntime",
-        build_dir,
-        cache_path,
-        directory_path,
-        target,
-    );
-    let _ = environment_variables(
-        "onnxruntime",
-        Some(&std::path::Path::new(&build_dir).join(directory_path)),
-    );
+fn asset_onnxruntime(config: &Config) -> IgnitionResult<()> {
+    let asset = ONNXRuntime::new();
+    if !asset.check_target_excluded(config) {
+        let _ = asset_retrieve(&asset, &config)?;
+        let _ = environment_variables(&asset, Some(&config))?;
+    }
+    Ok(())
 }
 
 /// Retrieve an asset by name using the asset.sh script
-fn asset_retrieve(
-    var_bucket_url: &str,
-    asset: &str,
-    build_dir: &str,
-    cache_path: &str,
-    directory_path: &str,
-    target: &str,
-) {
+fn asset_retrieve<T: Retrievable>(
+    _: &T,
+    config: &Config,
+) -> IgnitionResult<String> {
+    let asset_path_key = format!("DEP_IGNITION_SYS_{}_PATH", <T as Retrievable>::KEY.to_uppercase());
     let mut output = Command::new(ASSET_SCRIPT_PATH)
-        .args([
-            var_bucket_url,
-            asset,
-            build_dir,
-            cache_path,
-            directory_path,
-            target,
-        ])
+        .args(
+            [
+                config.bucket_url.clone(),
+                <T as Retrievable>::KEY.to_string(),
+                config.build_dir.clone(),
+                config.cache_dir.clone(),
+                config.asset_dir.clone(),
+                config.target.clone(),
+                asset_path_key,
+            ]
+        )
         .spawn()
         .expect("asset.sh command failed to start");
     let _ = output.wait().expect("asset.sh command failed to complete");
+    // TODO: parse output for asset path, or print straight to cargo metadata from script?
+    Ok(String::new())
 }
 
 /// Prepare the asset.sh script by making it executable
@@ -125,24 +80,11 @@ fn asset_script() {
     let _ = output.wait().expect("'chmod +x <script-path>' failed");
 }
 
-/// Main entry point
+/// Main entry point, run configured from user-specified environment variables and defaults
 fn main() {
     // force re-run by pointing to a non-existent file
-    println!("cargo:rerun-if-changed=NULL");
-
-    // require definition and format: /../target/<target-triplet>/<build-type>/build/<ignition-build-id>/out
-    let out_dir = var("OUT_DIR").unwrap();
-    let build_dir = out_dir.split(&"/build".to_string()).next().unwrap();
-
-    // parse target
-    let target = std::env::var("TARGET").unwrap_or("".to_string());
-
-    // retrieve assets and set environment variables
-    asset(
-        &var("IGNITION_BUCKET_URL").expect("IGNITION_BUCKET_URL environment variable error"),
-        build_dir,
-        &var("IGNITION_CACHE_PATH").unwrap_or(DEFAULT_CACHE_PATH.to_string()),
-        &var("IGNITION_DIRECTORY_PATH").unwrap_or(DEFAULT_DIRECTORY_PATH.to_string()),
-        &target,
-    );
+    println!("cargo::rerun-if-changed=NULL");
+    let config = Config::new().expect("failed to create Ignition config");
+    println!("{:?}", config);
+    asset(config).expect("failed to retrieve assets");
 }

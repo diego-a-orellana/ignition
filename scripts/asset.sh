@@ -174,7 +174,8 @@ ROOT=$3
 CACHE=$4
 DIRECTORY=$5
 TARGET_TRIPLET=$6
-VARIANT=$7
+VARIANT=""
+ASSET_PATH_KEY=$7
 
 # architecture, vendor, os, environment
 TARGET_TRIPLET_MAP=$(target_triplet_map "$TARGET_TRIPLET")
@@ -249,5 +250,6 @@ extract_data "$ASSET_PATH" "$EXTRACT_PATH"
 # Teardown
 # ------------------------------
 
-# nothing to do
+# print asset retrieval path before exit
+echo "cargo::metadata=${ASSET_PATH_KEY}=${ASSET_PATH}"
 exit 0
