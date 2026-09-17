@@ -1,8 +1,9 @@
 // build.rs
 //
-// This crate performs pre-compilation asset retrieval and cargo metadata setting.
-// During runtime of a dependent `build.rs`, this crate will retrieve cargo metadata and export environment variables.
+// On crate compilation, assets are retrieved and environment variables are exported as cargo metadata.
+// On dependent compilation, cargo metadata are retrieved and environment variables are set.
 //
+
 use std::process::Command;
 
 include!("src/lib.rs");
@@ -22,13 +23,11 @@ fn asset(config: Config) -> IgnitionResult<()> {
 
 /// Retrieve OpenCV asset and set environment variables
 #[cfg(feature = "download-opencv")]
-fn asset_opencv(
-    config: &Config,
-) -> IgnitionResult<()> {
+fn asset_opencv(config: &Config) -> IgnitionResult<()> {
     let asset = OpenCv::new();
-    if !asset.check_target_excluded(config) {
+    if !asset.check_target_excluded(&config.target) {
         let _ = asset_retrieve(&asset, config)?;
-        let _ = environment_variables(&asset, Some(&config))?;
+        let _ = environment_variables(&asset, Some(config))?;
     }
     Ok(())
 }
@@ -37,31 +36,29 @@ fn asset_opencv(
 #[cfg(feature = "download-onnxruntime")]
 fn asset_onnxruntime(config: &Config) -> IgnitionResult<()> {
     let asset = ONNXRuntime::new();
-    if !asset.check_target_excluded(config) {
-        let _ = asset_retrieve(&asset, &config)?;
-        let _ = environment_variables(&asset, Some(&config))?;
+    if !asset.check_target_excluded(&config.target) {
+        let _ = asset_retrieve(&asset, config)?;
+        let _ = environment_variables(&asset, Some(config))?;
     }
     Ok(())
 }
 
 /// Retrieve an asset by name using the asset.sh script
-fn asset_retrieve<T: Retrievable>(
-    _: &T,
-    config: &Config,
-) -> IgnitionResult<String> {
-    let asset_path_key = format!("DEP_IGNITION_SYS_{}_PATH", <T as Retrievable>::KEY.to_uppercase());
+fn asset_retrieve<T: Retrievable>(_: &T, config: &Config) -> IgnitionResult<String> {
+    let asset_path_key = format!(
+        "DEP_IGNITION_SYS_{}_PATH",
+        <T as Retrievable>::KEY.to_uppercase()
+    );
     let mut output = Command::new(ASSET_SCRIPT_PATH)
-        .args(
-            [
-                config.bucket_url.clone(),
-                <T as Retrievable>::KEY.to_string(),
-                config.build_dir.clone(),
-                config.cache_dir.clone(),
-                config.asset_dir.clone(),
-                config.target.clone(),
-                asset_path_key,
-            ]
-        )
+        .args([
+            config.bucket_url.clone(),
+            <T as Retrievable>::KEY.to_string(),
+            config.build_dir.clone(),
+            config.cache_dir.clone(),
+            config.asset_dir.clone(),
+            config.target.clone(),
+            asset_path_key,
+        ])
         .spawn()
         .expect("asset.sh command failed to start");
     let _ = output.wait().expect("asset.sh command failed to complete");

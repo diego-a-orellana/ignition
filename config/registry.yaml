@@ -1,0 +1,14 @@
+ort:
+  name: onnxruntime
+  contents:
+    - onnxruntime/lib
+  environment:
+    - ORT_LIB_LOCATION: onnxruntime
+opencv-rust:
+  name: opencv
+  contents:
+    - opencv/lib
+    - opencv/opencv4
+  environment:
+    - OPENCV_LINK_PATHS: opencv/lib
+    - OPENCV_INCLUDE_PATHS: opencv/opencv4

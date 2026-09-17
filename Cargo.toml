@@ -13,9 +13,11 @@ test = false
 
 [dependencies]
 thiserror = "1.0"
+serde_yaml = "0.9"
 
 [build-dependencies]
 thiserror = "1.0"
+serde_yaml = "0.9"
 
 [features]
 default = ["download-onnxruntime", "download-opencv"]
