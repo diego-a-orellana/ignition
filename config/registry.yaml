@@ -1,11 +1,13 @@
 ort:
-  name: onnxruntime
+  name: ONNXRuntime
+  key: onnxruntime
   contents:
     - onnxruntime/lib
   environment:
     - ORT_LIB_LOCATION: onnxruntime
 opencv-rust:
-  name: opencv
+  name: OpenCv
+  key: opencv
   contents:
     - opencv/lib
     - opencv/opencv4

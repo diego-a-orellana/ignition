@@ -3,10 +3,7 @@
 use std::collections::HashMap;
 
 // Configuration files
-pub(crate) const CFG_REGISTRY_STR: &str = include_str!("../config/registry.yaml");
-pub(crate) const CFG_REGISTRY_CONTENTS_KEY: &str = "contents";
-pub(crate) const CFG_REGISTRY_NAME_KEY: &str = "name";
-pub(crate) const CFG_REGISTRY_ENVIRONMENT_KEY: &str = "environment";
+// NOTE: `config/registry.yaml` is read at compile time by the `register_assets!` macro
 pub(crate) const CFG_TARGET_STR: &str = include_str!("../config/target.yaml");
 pub(crate) const CFG_TARGET_ALIAS_KEY: &str = "alias";
 

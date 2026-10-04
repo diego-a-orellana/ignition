@@ -1,3 +1,6 @@
+[workspace]
+members = ["macros"]
+
 [package]
 name = "ignition"
 version = "1.0.0"
@@ -12,10 +15,12 @@ doctest = false
 test = false
 
 [dependencies]
+ignition-macros = { path = "macros", version = "1.0.0" }
 thiserror = "1.0"
 serde_yaml = "0.9"
 
 [build-dependencies]
+ignition-macros = { path = "macros", version = "1.0.0" }
 thiserror = "1.0"
 serde_yaml = "0.9"
 
@@ -23,4 +28,3 @@ serde_yaml = "0.9"
 default = ["download-onnxruntime", "download-opencv"]
 download-onnxruntime = []
 download-opencv = []
-

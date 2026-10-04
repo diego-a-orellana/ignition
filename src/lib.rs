@@ -19,24 +19,38 @@ use asset::*;
 use config::*;
 use consts::*;
 use error::*;
+use ignition_macros::register_assets;
+
+// fn asset_retrieve_2<T: Retrievable>(_: &T, config: &Config) -> IgnitionResult<String> {
+//     let asset_path_key = format!(
+//         "DEP_IGNITION_SYS_{}_PATH",
+//         <T as Retrievable>::KEY.to_uppercase()
+//     );
+//     let target: Target = (&config.target).try_into()?;
+//     let target_parts = target_parts_aliased(&target);
+//     let mut output = Command::new(ASSET_SCRIPT_PATH)
+//         .args([
+//             config.bucket_url.clone(),
+//             <T as Retrievable>::KEY.to_string(),
+//             config.build_dir.clone(),
+//             config.cache_dir.clone(),
+//             config.asset_dir.clone(),
+//             config.target.clone(),
+//             asset_path_key,
+//         ])
+//         .spawn()
+//         .expect("asset.sh command failed to start");
+//     let _ = output.wait().expect("asset.sh command failed to complete");
+//     // TODO: parse output for asset path, or print straight to cargo metadata from script?
+//     Ok(String::new())
+// }
 
 /// Either retrieve (`config` not provided) or set (`config` provided) environment variables for a particular asset.
 ///
 /// First argument (always provided) as `Asset` tuple struct implementing trait `Extractable`.
-/// Example contents and environment:
-/// ```rust
-/// const CONTENTS: [&str; 3] = [
-///     "path/to/content1",
-///     "path/to/content2",
-///     "path/to/content3"
-/// ];
-/// const ENVIRONMENT: [(&str, &str); 2] = [
-///     ("ENV_VAR1", "path/to/content1"),
-///     ("ENV_VAR2", "path/to/content2"),
-/// ];
-/// ```
 ///
-/// From example above, the return will always be a HashMap of environment variables and corresponding absolute paths:
+/// For an asset exporting two environment variables, the return will always be a HashMap of
+/// environment variables and corresponding absolute paths:
 /// ```rust
 /// HashMap<String, String>
 /// {
@@ -47,8 +61,7 @@ use error::*;
 ///
 /// Retrieving and setting are blind (not validated), so possible to overwrite or return empty strings.
 ///
-/// NOTE: T::CONTENTS may be disjoint from T::ENVIRONMENT. When Config is provided, path existence for each checked independently.
-pub fn environment_variables<T: Extractable<N, M>, const N: usize, const M: usize>(
+pub fn environment_variables<T: Extractable>(
     _: &T,
     config: Option<&Config>,
 ) -> IgnitionResult<HashMap<String, String>> {
@@ -102,3 +115,6 @@ pub fn environment_variables<T: Extractable<N, M>, const N: usize, const M: usiz
 
     Ok(env_vars)
 }
+
+// Asset types generated from the registry
+register_assets!("config/registry.yaml");

@@ -25,10 +25,8 @@ fn asset(config: Config) -> IgnitionResult<()> {
 #[cfg(feature = "download-opencv")]
 fn asset_opencv(config: &Config) -> IgnitionResult<()> {
     let asset = OpenCv::new();
-    if !asset.check_target_excluded(&config.target) {
-        let _ = asset_retrieve(&asset, config)?;
-        let _ = environment_variables(&asset, Some(config))?;
-    }
+    let _ = asset_retrieve(&asset, config)?;
+    let _ = environment_variables(&asset, Some(config))?;
     Ok(())
 }
 
@@ -36,10 +34,8 @@ fn asset_opencv(config: &Config) -> IgnitionResult<()> {
 #[cfg(feature = "download-onnxruntime")]
 fn asset_onnxruntime(config: &Config) -> IgnitionResult<()> {
     let asset = ONNXRuntime::new();
-    if !asset.check_target_excluded(&config.target) {
-        let _ = asset_retrieve(&asset, config)?;
-        let _ = environment_variables(&asset, Some(config))?;
-    }
+    let _ = asset_retrieve(&asset, config)?;
+    let _ = environment_variables(&asset, Some(config))?;
     Ok(())
 }
 

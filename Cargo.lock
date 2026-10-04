@@ -18,8 +18,20 @@ checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 name = "ignition"
 version = "1.0.0"
 dependencies = [
+ "ignition-macros",
  "serde_yaml",
  "thiserror",
+]
+
+[[package]]
+name = "ignition-macros"
+version = "1.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_yaml",
+ "syn 2.0.114",
 ]
 
 [[package]]
@@ -69,6 +81,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
 dependencies = [
  "serde_core",
+ "serde_derive",
 ]
 
 [[package]]
