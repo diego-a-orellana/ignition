@@ -1,12 +1,17 @@
-# Ignition
+```
+▀█▀  ▄▄▄ ▄▄▄  ▀ ▄█▄  ▀  ▄▄  ▄▄▄  
+ █  █  █ █  █ █  █   █ █  █ █  █ 
+▀▀▀  ▀▀█ ▀  ▀ ▀   ▀▀ ▀  ▀▀  ▀  ▀ 
+     ▀▀                 v1.0.0 💥       
+```
 
 Build-time retrieval of precompiled dependencies.
 
 Ignition is a build dependency that, during its own compilation, downloads target-specific
 asset archives from a remote bucket, extracts them, and exports their paths as cargo metadata.
+
 Dependent build scripts then read that metadata and set the environment variables their own
-`-sys` crates expect (`OPENCV_LINK_PATHS`, `ORT_LIB_LOCATION`, and so on), so that nothing
-has to be built from source or vendored into the repository.
+`-sys` crates expect (`OPENCV_LINK_PATHS`, `ORT_LIB_LOCATION`, and so on).
 
 ## How it works
 
@@ -19,8 +24,7 @@ IGNITION_BUCKET_URL -> ignition/build.rs -> download/extract -> cargo::metadata
 ```
 
 Assets are declared once in [`config/registry.yaml`](config/registry.yaml). The
-`register_assets!` macro reads that file at compile time and generates a type per asset, so
-adding a dependency is a configuration change rather than a code change.
+`register_assets!` macro reads that file at compile time and generates a type per entry.
 
 ## Usage
 
@@ -45,7 +49,7 @@ fn main() {
 Passing `None` retrieves metadata and sets the variables. Ignition itself passes `Some(&config)`
 during its own build, which is what exports them in the first place.
 
-Cargo only passes `links` metadata to the build scripts of **immediate** dependents, so each
+NOTE: Cargo only passes `links` metadata to the build scripts of **immediate** dependents, so each
 crate that needs these variables must depend on Ignition directly.
 
 ## Configuration
@@ -58,7 +62,7 @@ crate that needs these variables must depend on Ignition directly.
 | `IGNITION_ASSET_DIR` | `assets/dependencies` | Asset path within the bucket and the build directory |
 | `IGNITION_CACHE_DIR` | `cache` | Archive cache, relative to the build directory |
 
-`OUT_DIR` and `TARGET` are supplied by cargo. The build directory is derived from `OUT_DIR`,
+NOTE: `OUT_DIR` and `TARGET` are supplied by cargo. The build directory is derived from `OUT_DIR`,
 and `TARGET` selects which build of an asset to fetch.
 
 ### Features
@@ -90,8 +94,7 @@ Locally, archives are cached and extracted under the build directory:
 ```
 
 A cached archive is only ever a complete one: downloads are written to a `.part` file, checked
-against `Content-Length`, and renamed into place on success, so an interrupted build cannot
-poison the cache.
+against `Content-Length`, and renamed into place on success.
 
 ## Adding an asset
 
@@ -139,8 +142,7 @@ make test
 ```
 
 The workspace is this crate plus [`macros/`](macros), which holds the `register_assets!`
-procedural macro. The build script runs on every build and will reach the network unless the
-archives are already cached.
+procedural macro.
 
 ## License
 
