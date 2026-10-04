@@ -8,8 +8,8 @@ pub mod asset;
 pub mod config;
 pub mod consts;
 pub mod error;
+#[cfg(feature = "download")]
 pub mod retrieve;
-pub mod target;
 
 use std::{
     collections::HashMap,

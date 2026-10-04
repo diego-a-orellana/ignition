@@ -131,7 +131,6 @@ fn retrieval<'a>(entries: impl Iterator<Item = &'a RegistryEntry>) -> TokenStrea
         // `config` is unused when no asset feature is enabled
         #[allow(unused_variables)]
         pub fn retrieve_assets(config: &crate::config::Config) -> crate::error::IgnitionResult<()> {
-            crate::retrieve::asset_script();
             #(#blocks)*
             Ok(())
         }

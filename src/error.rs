@@ -7,30 +7,27 @@ use thiserror::Error;
 /// Error types.
 #[derive(Error, Clone, Debug)]
 pub enum IgnitionError {
+    /// Asset archive extraction error.
+    #[error("failed to extract archive {0}: {1}")]
+    ArchiveError(PathBuf, String),
     /// Out directory error.
     #[error("OUT_DIR environment variable does not contain `/../build`: {0}")]
     BuildDirectoryError(String),
-    /// Deserialization error.
-    #[error("deserialization error: {0}")]
-    DeserializationError(String),
+    /// Asset archive retrieved incompletely.
+    #[error("incomplete download of {0}: expected {1} bytes, received {2}")]
+    DownloadError(String, u64, u64),
     /// Environment variable error.
     #[error("environment variable error: {0}")]
     EnvironmentVariableError(#[from] VarError),
+    /// Filesystem error.
+    #[error("filesystem error at {0}: {1}")]
+    FileSystemError(PathBuf, String),
     /// Path error.
     #[error("path error: {0}")]
     PathError(PathBuf),
-    /// Target alias key not found (e.g. 'architecture', 'vendor', 'operating_system', or 'environment')
-    #[error("target alias key not found: {0}")]
-    TargetAliasKeyNotFoundError(String),
-    /// Target configuration (myaml string)
-    #[error("target configuration key not found: {0}")]
-    TargetConfigurationKeyNotFoundError(String),
-}
-
-impl From<serde_yaml::Error> for IgnitionError {
-    fn from(err: serde_yaml::Error) -> Self {
-        IgnitionError::DeserializationError(err.to_string())
-    }
+    /// Remote asset request error.
+    #[error("request error for {0}: {1}")]
+    RequestError(String, String),
 }
 
 /// Result type for Ignition functions.
