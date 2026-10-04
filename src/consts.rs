@@ -14,8 +14,8 @@ pub(crate) const ENV_TARGET: &str = "TARGET";
 pub(crate) const ENV_METADATA_KEY_PREFIX: &str = "DEP_IGNITION_SYS_";
 
 // Asset archive retrieval
-// NOTE: cargo prefixes exported metadata keys, so `<ASSET>_PATH` is read as
-// `DEP_IGNITION_SYS_<ASSET>_PATH` by dependent build scripts
+// NOTE: cargo prefixes exported metadata keys, so `<ASSET>_ASSET_PATH` is read as
+// `DEP_IGNITION_SYS_<ASSET>_ASSET_PATH` by dependent build scripts
 #[cfg(feature = "download")]
 pub(crate) const ARCHIVE_EXTENSION: &str = ".tar.gz";
 #[cfg(feature = "download")]
