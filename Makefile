@@ -1,5 +1,4 @@
 # format/clippy/test
-
 all:
 	make format && make clippy && make test
 

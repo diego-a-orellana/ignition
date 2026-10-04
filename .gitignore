@@ -25,3 +25,6 @@ rustc-ice-*.txt
 
 # Configs expected in dependents, used locally only for testing
 .cargo/
+
+# Env
+.env
