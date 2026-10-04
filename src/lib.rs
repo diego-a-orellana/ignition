@@ -8,6 +8,7 @@ pub mod asset;
 pub mod config;
 pub mod consts;
 pub mod error;
+pub mod retrieve;
 pub mod target;
 
 use std::{
@@ -20,30 +21,6 @@ use config::*;
 use consts::*;
 use error::*;
 use ignition_macros::register_assets;
-
-// fn asset_retrieve_2<T: Retrievable>(_: &T, config: &Config) -> IgnitionResult<String> {
-//     let asset_path_key = format!(
-//         "DEP_IGNITION_SYS_{}_PATH",
-//         <T as Retrievable>::KEY.to_uppercase()
-//     );
-//     let target: Target = (&config.target).try_into()?;
-//     let target_parts = target_parts_aliased(&target);
-//     let mut output = Command::new(ASSET_SCRIPT_PATH)
-//         .args([
-//             config.bucket_url.clone(),
-//             <T as Retrievable>::KEY.to_string(),
-//             config.build_dir.clone(),
-//             config.cache_dir.clone(),
-//             config.asset_dir.clone(),
-//             config.target.clone(),
-//             asset_path_key,
-//         ])
-//         .spawn()
-//         .expect("asset.sh command failed to start");
-//     let _ = output.wait().expect("asset.sh command failed to complete");
-//     // TODO: parse output for asset path, or print straight to cargo metadata from script?
-//     Ok(String::new())
-// }
 
 /// Either retrieve (`config` not provided) or set (`config` provided) environment variables for a particular asset.
 ///
@@ -116,5 +93,5 @@ pub fn environment_variables<T: Extractable>(
     Ok(env_vars)
 }
 
-// Asset types generated from the registry
+// Asset types and `retrieve_assets` generated from the registry
 register_assets!("config/registry.yaml");

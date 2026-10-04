@@ -16,7 +16,6 @@ pub(crate) const ENV_TARGET: &str = "TARGET";
 
 // Environment variable prefixes (for export and additional configuration)
 pub(crate) const ENV_METADATA_KEY_PREFIX: &str = "DEP_IGNITION_SYS_";
-pub(crate) const ENV_TARGET_EXCLUSIONS_PREFIX: &str = "IGNITION_TARGET_EXCLUSIONS_";
 
 // Target triplet parts
 pub(crate) const TARGET_ARCHITECTURE_KEY: &str = "architecture";

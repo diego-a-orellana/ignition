@@ -1,8 +1,6 @@
 // Asset base struct and traits, referenced in registry macros.
 
-use std::{env::var, ops::Deref};
-
-use crate::consts::*;
+use std::ops::Deref;
 
 #[derive(Default)]
 pub struct Asset {}
