@@ -31,39 +31,6 @@ struct RegistryEntry {
     environment: Vec<BTreeMap<String, String>>,
 }
 
-// /// Registry entry validated for code generation.
-// struct Asset {
-//     /// Type name generated for the asset.
-//     name: Ident,
-//     /// Asset key, as used for retrieval and metadata prefixes.
-//     key: String,
-//     /// Feature flag enabling retrieval of the asset.
-//     feature: String,
-//     /// Expected contents on extraction of the asset archive.
-//     contents: Vec<String>,
-//     /// Environment variables and their asset-relative content paths.
-//     environment: Vec<(String, String)>,
-// }
-
-// impl TryFrom<&RegistryEntry> for Asset {
-//     type Error = String;
-
-//     fn try_from(entry: &RegistryEntry) -> Result<Self, Self::Error> {
-//         Ok(Self {
-//             name: identifier(&entry.name)?,
-//             key: entry.key.clone(),
-//             feature: format!("{}{}", FEATURE_FLAG_PREFIX, entry.key),
-//             contents: entry.contents.clone(),
-//             environment: entry
-//                 .environment
-//                 .iter()
-//                 .flat_map(|mapping| mapping.iter())
-//                 .map(|(env_var, content)| (env_var.clone(), content.clone()))
-//                 .collect(),
-//         })
-//     }
-// }
-
 /// Generate an asset type for every entry of the registry at `<CARGO_MANIFEST_DIR>/<path>`.
 ///
 /// Each entry emits a tuple struct over `Asset` implementing `Retrievable` and `Extractable`.
@@ -90,13 +57,8 @@ fn registry(registry_path: &str) -> Result<TokenStream2, String> {
     let registry: BTreeMap<String, RegistryEntry> = serde_yaml::from_str(&registry_str)
         .map_err(|err| format!("failed to deserialize registry {}: {}", path.display(), err))?;
 
-    // let assets = registry
-    //     .values()
-    //     .map(Asset::try_from)
-    //     .collect::<Result<Vec<Asset>, String>>()?;
-    // let types = assets.iter().map(asset);
     let types = registry.values().map(asset).collect::<Vec<TokenStream2>>();
-    let retrieval = retrieval(&registry.values().collect::<Vec<&RegistryEntry>>());
+    let retrieval = retrieval(registry.values());
 
     // Cargo does not track files read during macro expansion, so the registry is also included
     // as a (discarded) string to register it as a dependency of the compilation
@@ -110,24 +72,9 @@ fn registry(registry_path: &str) -> Result<TokenStream2, String> {
 
 /// Expand a single asset into its type and trait implementations.
 fn asset(entry: &RegistryEntry) -> TokenStream2 {
-    // let name = &asset.name;
-    // let key = &asset.key;
-    // let contents = &asset.contents;
-    let name = entry.name.clone();
-    let key = entry.key.clone();
-    let contents = entry.contents.clone();
-    // let e: Vec<(String, String)> = entry
-    //     .environment
-    //     .iter()
-    //     .flat_map(|mapping| mapping.iter())
-    //     .map(|(env_var, content)| (env_var.clone(), content.clone()))
-    //     .collect();
-    // let environment = e
-    //     // .environment
-    //     .iter()
-    //     .map(|(env_var, content)| quote! { (#env_var, #content) })
-    //     .collect::<Vec<TokenStream2>>();
-
+    let name = &entry.name;
+    let key = &entry.key;
+    let contents = &entry.contents;
     let environment = entry
         .environment
         .iter()
@@ -164,8 +111,8 @@ fn asset(entry: &RegistryEntry) -> TokenStream2 {
 }
 
 /// Expand the retrieval entry point, one feature-gated block per asset.
-fn retrieval(entries: &[&RegistryEntry]) -> TokenStream2 {
-    let blocks = entries.iter().map(|entry| {
+fn retrieval<'a>(entries: impl Iterator<Item = &'a RegistryEntry>) -> TokenStream2 {
+    let blocks = entries.map(|entry| {
         let name = &entry.name;
         let feature = format!("{}{}", FEATURE_FLAG_PREFIX, entry.key);
         quote! {
@@ -191,21 +138,7 @@ fn retrieval(entries: &[&RegistryEntry]) -> TokenStream2 {
     }
 }
 
-// /// Validate an asset name before using it as a type identifier.
-// fn identifier(name: &str) -> Result<Ident, String> {
-//     let valid = name
-//         .chars()
-//         .next()
-//         .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
-//         && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_');
-//     if valid {
-//         Ok(Ident::new(name, Span::call_site()))
-//     } else {
-//         Err(format!("invalid asset name (not an identifier): {}", name))
-//     }
-// }
-
-// Custom function to multiply an integer field by 2 on load
+/// Deserialize an asset name, validating it as a type identifier.
 fn deserialize_name<'de, D>(deserializer: D) -> Result<Ident, D::Error>
 where
     D: Deserializer<'de>,
@@ -219,6 +152,9 @@ where
     if valid {
         Ok(Ident::new(&name, Span::call_site()))
     } else {
-        Err(D::Error::custom(format!("invalid asset name (not an identifier): {}", name)))?
+        Err(D::Error::custom(format!(
+            "invalid asset name (not an identifier): {}",
+            name
+        )))
     }
 }
