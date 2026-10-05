@@ -1,8 +1,12 @@
+[workspace]
+members = ["macros"]
+
 [package]
 name = "ignition"
 version = "1.0.0"
 edition = "2024"
 links = "ignition_sys"
+license = "MIT"
 
 [lib]
 name = "ignition"
@@ -11,17 +15,22 @@ doctest = false
 test = false
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.137"
+ignition-macros = { path = "macros", version = "1.0.0" }
 thiserror = "1.0"
+flate2 = { version = "1.0", optional = true }
+tar = { version = "0.4", optional = true }
+ureq = { version = "2.12", optional = true }
 
 [build-dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.137"
+ignition-macros = { path = "macros", version = "1.0.0" }
 thiserror = "1.0"
+flate2 = { version = "1.0", optional = true }
+tar = { version = "0.4", optional = true }
+ureq = { version = "2.12", optional = true }
 
 [features]
 default = ["download-onnxruntime", "download-opencv"]
-download-onnxruntime = []
-download-opencv = []
-
+# Asset retrieval, enabled by any `download-<asset>` feature
+download = ["dep:flate2", "dep:tar", "dep:ureq"]
+download-onnxruntime = ["download"]
+download-opencv = ["download"]
