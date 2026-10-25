@@ -93,6 +93,11 @@ fn asset(entry: &RegistryEntry) -> TokenStream2 {
             pub fn new() -> Self {
                 Self(crate::asset::Asset::new())
             }
+
+            // Convenience method for dependent build scripts to re-export environment variables from cargo metadata.
+            pub fn environment_variables() -> crate::error::IgnitionResult<HashMap<String, String>> {
+                crate::environment_variables(&#name::new(), None)
+            }
         }
 
         impl ::std::ops::Deref for #name {
