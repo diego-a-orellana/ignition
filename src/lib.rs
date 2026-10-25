@@ -22,6 +22,15 @@ use consts::*;
 use error::*;
 use ignition_macros::register_assets;
 
+/// Path for retrieved asset either locally (no prefix) or from dependent build script (prefix required).
+pub fn asset_path<T: Retrievable>(_: &T, dependent: bool) -> IgnitionResult<String> {
+    let mut key_parts = vec![T::KEY.to_uppercase(), METADATA_PATH_KEY_SUFFIX.to_string()];
+    if dependent {
+        key_parts.insert(0, ENV_METADATA_KEY_PREFIX.to_string());
+    }
+    Ok(std::env::var(key_parts.join(""))?)
+}
+
 /// Either retrieve (`config` not provided) or set (`config` provided) environment variables for a particular asset.
 ///
 /// First argument (always provided) as `Asset` tuple struct implementing trait `Extractable`.
@@ -61,7 +70,7 @@ pub fn environment_variables<T: Extractable>(
 
     // Either set (config provided) or retrieve (config not provided) env vars
     for (env_var, cont) in T::ENVIRONMENT.iter() {
-        // (1) directory provided, so export <ENV_VAR> as cargo metadata for use in other crates
+        // (1) config provided, so export <ENV_VAR> as cargo metadata for use in other crates
         // NOTE: also checks that content exists (may be distinct from T::CONTENTS)
         if let Some(cfg) = config {
             let cont_path = cfg.asset_path().join(cont);
@@ -80,7 +89,7 @@ pub fn environment_variables<T: Extractable>(
                 env_vars.insert(env_var.to_string(), cont_path_str.to_string());
             }
 
-        // (2) directory not provided, so retrieve DEP_IGNITION_SYS_<ENV_VAR> and set <ENV_VAR>
+        // (2) config not provided, so retrieve DEP_IGNITION_SYS_<ENV_VAR> and set <ENV_VAR>
         } else {
             let env_var_value = var(ENV_METADATA_KEY_PREFIX.to_string() + env_var)?;
             unsafe {

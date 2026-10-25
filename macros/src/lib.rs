@@ -94,7 +94,12 @@ fn asset(entry: &RegistryEntry) -> TokenStream2 {
                 Self(crate::asset::Asset::new())
             }
 
-            // Convenience method for dependent build scripts to re-export environment variables from cargo metadata.
+            // Convenience method *for dependent build scripts* to retrieve the asset path from cargo metadata.
+            pub fn asset_path() -> crate::error::IgnitionResult<String> {
+                crate::asset_path(&#name::new(), true)
+            }
+
+            // Convenience method *for dependent build scripts* to re-export environment variables from cargo metadata.
             pub fn environment_variables() -> crate::error::IgnitionResult<HashMap<String, String>> {
                 crate::environment_variables(&#name::new(), None)
             }
