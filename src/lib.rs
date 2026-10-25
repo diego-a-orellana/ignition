@@ -93,5 +93,6 @@ pub fn environment_variables<T: Extractable>(
     Ok(env_vars)
 }
 
-// Asset types and `retrieve_assets` generated from the registry
+// Asset types and `retrieve_assets` generated from the registry.
+// Note: registry filepath relative to workspace root.
 register_assets!("config/registry.yaml");

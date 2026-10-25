@@ -4,6 +4,8 @@
 // Asset types are emitted at compile time from `config/registry.yaml` of the dependent crate.
 //
 
+mod consts;
+
 use std::{collections::BTreeMap, env::var, fs::read_to_string, path::PathBuf};
 
 use proc_macro::TokenStream;
@@ -12,8 +14,7 @@ use quote::quote;
 use serde::{Deserialize, Deserializer, de::Error};
 use syn::{LitStr, parse_macro_input};
 
-const ENV_MANIFEST_DIR: &str = "CARGO_MANIFEST_DIR";
-const FEATURE_FLAG_PREFIX: &str = "download-";
+use crate::consts::*;
 
 /// Single asset entry of the registry, keyed by its (unused) crate identifier.
 #[derive(Deserialize)]
@@ -31,38 +32,40 @@ struct RegistryEntry {
     environment: Vec<BTreeMap<String, String>>,
 }
 
-/// Generate an asset type for every entry of the registry at `<CARGO_MANIFEST_DIR>/<path>`.
+/// Generate an asset type for every entry of at `<ENV_MANIFEST_DIR>/<registry_relative_filepath>`.
 ///
 /// Each entry emits a tuple struct over `Asset` implementing `Retrievable` and `Extractable`.
 /// A `retrieve_assets` entry point is emitted alongside them, retrieving each asset whose
-/// `download-<key>` feature is enabled.
+/// `FEATURE_FLAG_PREFIX<key>` feature is enabled.
 #[proc_macro]
 pub fn register_assets(input: TokenStream) -> TokenStream {
-    let registry_path = parse_macro_input!(input as LitStr).value();
-    match registry(&registry_path) {
+    let registry_relative_filepath = parse_macro_input!(input as LitStr).value();
+    match registry(&registry_relative_filepath) {
         Ok(tokens) => tokens.into(),
         Err(err) => quote! { ::std::compile_error!(#err); }.into(),
     }
 }
 
 /// Read, deserialize and expand the registry.
-fn registry(registry_path: &str) -> Result<TokenStream2, String> {
-    let path = PathBuf::from(
-        var(ENV_MANIFEST_DIR).map_err(|err| format!("{} error: {}", ENV_MANIFEST_DIR, err))?,
+fn registry(registry_relative_filepath: &str) -> Result<TokenStream2, String> {
+    // Manifest dir at runtime (not compile time) to get relative to caller
+    let registry_path = PathBuf::from(
+        var(ENV_MANIFEST_DIR)
+            .map_err(|err| format!("failed to get manifest directory: {}", err))?,
     )
-    .join(registry_path);
-    let registry_str = read_to_string(&path)
-        .map_err(|err| format!("failed to read registry {}: {}", path.display(), err))?;
+    .join(registry_relative_filepath);
+    let registry_str = read_to_string(&registry_path)
+        .map_err(|err| format!("failed to read registry: {}", err))?;
     // Deserialized as an ordered map so that generated code is stable across builds
     let registry: BTreeMap<String, RegistryEntry> = serde_yaml::from_str(&registry_str)
-        .map_err(|err| format!("failed to deserialize registry {}: {}", path.display(), err))?;
+        .map_err(|err| format!("failed to deserialize registry: {}", err))?;
 
     let types = registry.values().map(asset).collect::<Vec<TokenStream2>>();
     let retrieval = retrieval(registry.values());
 
     // Cargo does not track files read during macro expansion, so the registry is also included
     // as a (discarded) string to register it as a dependency of the compilation
-    let path_str = path.to_string_lossy();
+    let path_str = registry_path.to_string_lossy();
     Ok(quote! {
         const _: &str = ::std::include_str!(#path_str);
         #(#types)*
