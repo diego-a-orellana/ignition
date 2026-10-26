@@ -45,7 +45,7 @@ fn main() {
     let _ = ignition::OpenCv::environment_variables().expect("failed to set environment variables");
 
     // optional: cache path of the retrieved asset
-    let _ = ignition::OpenCv::asset_path().expect("failed to retrieve asset path");
+    let asset_path = ignition::OpenCv::asset_path().expect("failed to retrieve asset path");
 }
 ```
 
