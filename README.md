@@ -10,8 +10,8 @@ Build-time retrieval of precompiled dependencies.
 Ignition is a build dependency that, during its own compilation, downloads target-specific
 asset archives from a remote bucket, extracts them, and exports their paths as cargo metadata.
 
-Dependent build scripts then read that metadata and set the environment variables their own
-`-sys` crates expect (`OPENCV_LINK_PATHS`, `ORT_LIB_LOCATION`, and so on).
+Dependent build scripts then read that metadata and set the environment variables their crates
+or related dependencies expect (e.g. `OPENCV_LINK_PATHS`, `ORT_LIB_LOCATION`, and so on).
 
 ## How it works
 
@@ -38,16 +38,16 @@ ignition = { git = "https://github.com/diego-a-orellana/ignition", version = "1.
 Then, in that crate's `build.rs`, set the environment variables for the assets you use:
 
 ```rust
-use ignition::{OpenCv, environment_variables};
+use ignition;
 
 fn main() {
     // reads DEP_IGNITION_SYS_* metadata and sets OPENCV_LINK_PATHS, OPENCV_INCLUDE_PATHS
-    environment_variables(&OpenCv::new(), None).expect("failed to set OpenCV environment");
+    let _ = ignition::OpenCv::environment_variables().expect("failed to set environment variables");
+
+    // optional: cache path of the retrieved asset
+    let _ = ignition::OpenCv::asset_path().expect("failed to retrieve asset path");
 }
 ```
-
-Passing `None` retrieves metadata and sets the variables. Ignition itself passes `Some(&config)`
-during its own build, which is what exports them in the first place.
 
 NOTE: Cargo only passes `links` metadata to the build scripts of **immediate** dependents, so each
 crate that needs these variables must depend on Ignition directly.
