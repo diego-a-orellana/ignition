@@ -5,6 +5,7 @@ use std::{
     fs::{File, create_dir_all, rename},
     io::copy,
     path::{Path, PathBuf},
+    time::Duration,
 };
 
 use flate2::read::GzDecoder;
@@ -56,6 +57,7 @@ pub fn asset_retrieve<T: Retrievable>(_: &T, config: &Config) -> IgnitionResult<
     if let Some(cache_dir) = paths.archive.parent() {
         directory(cache_dir)?;
     }
+    let _lock = lock_asset(&paths.archive)?;
     directory(&paths.extract)?;
 
     // A cached archive is complete by construction, so retrieval is skipped
@@ -80,13 +82,34 @@ fn directory(directory: &Path) -> IgnitionResult<()> {
         .map_err(|err| IgnitionError::FileSystemError(directory.to_path_buf(), err.to_string()))
 }
 
+/// Hold a process lock through retrieval and extraction; retain the file for other waiters.
+fn lock_asset(archive: &Path) -> IgnitionResult<File> {
+    let mut path = OsString::from(archive);
+    path.push(".lock");
+    let path = PathBuf::from(path);
+    let failure =
+        |err: std::io::Error| IgnitionError::FileSystemError(path.clone(), err.to_string());
+    let lock = File::options()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(&path)
+        .map_err(failure)?;
+    lock.lock().map_err(failure)?;
+    Ok(lock)
+}
+
 /// Download an asset archive, renaming it into place once complete.
 fn download(url: &str, archive: &Path, size: u64) -> IgnitionResult<()> {
     let mut partial = OsString::from(archive);
     partial.push(ARCHIVE_PARTIAL_EXTENSION);
     let partial = PathBuf::from(partial);
 
-    let response = ureq::get(url).call().map_err(|err| request(url, err))?;
+    let response = ureq::get(url)
+        .timeout(Duration::from_secs(300))
+        .call()
+        .map_err(|err| request(url, err))?;
     let mut file = File::create(&partial)
         .map_err(|err| IgnitionError::FileSystemError(partial.clone(), err.to_string()))?;
     let written = copy(&mut response.into_reader(), &mut file)
@@ -120,7 +143,10 @@ fn request(url: &str, err: ureq::Error) -> IgnitionError {
 
 /// Validate that a remote asset archive exists, returning its size in bytes.
 fn validate(url: &str) -> IgnitionResult<u64> {
-    let response = ureq::head(url).call().map_err(|err| request(url, err))?;
+    let response = ureq::head(url)
+        .timeout(Duration::from_secs(30))
+        .call()
+        .map_err(|err| request(url, err))?;
     response
         .header("content-length")
         .and_then(|size| size.parse().ok())

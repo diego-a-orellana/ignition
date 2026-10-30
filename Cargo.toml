@@ -5,6 +5,7 @@ members = ["macros"]
 name = "ignition"
 version = "1.0.0"
 edition = "2024"
+rust-version = "1.89"
 links = "ignition_sys"
 license = "MIT"
 
