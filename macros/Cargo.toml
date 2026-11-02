@@ -1,11 +1,15 @@
 [package]
-name = "ignition-macros"
-version = "1.0.0"
+name = "ignition-macros-rs"
+description = "Supporting macros for Ignition."
+documentation = "https://docs.rs/ignition-macros-rs"
 edition = "2024"
 license = "MIT"
+repository = "https://github.com/diego-a-orellana/ignition"
+version = "1.0.0"
 
 [lib]
 proc-macro = true
+name = "ignition_macros"
 
 [dependencies]
 proc-macro2 = "1.0"

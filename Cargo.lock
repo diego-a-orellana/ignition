@@ -230,18 +230,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ignition"
-version = "1.0.0"
-dependencies = [
- "flate2",
- "ignition-macros",
- "tar",
- "thiserror",
- "ureq",
-]
-
-[[package]]
-name = "ignition-macros"
+name = "ignition-macros-rs"
 version = "1.0.0"
 dependencies = [
  "proc-macro2",
@@ -249,6 +238,17 @@ dependencies = [
  "serde",
  "serde_yaml",
  "syn 2.0.114",
+]
+
+[[package]]
+name = "ignition-rs"
+version = "1.0.0"
+dependencies = [
+ "flate2",
+ "ignition-macros-rs",
+ "tar",
+ "thiserror",
+ "ureq",
 ]
 
 [[package]]
