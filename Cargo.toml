@@ -9,7 +9,7 @@ edition = "2024"
 license = "MIT"
 links = "ignition_sys"
 readme = "README.md"
-repository = "https://github.com/diego-a-orellana/ignition"
+repository = "https://github.com/diego-a-orellana/ignition/tree/1.0.0"
 rust-version = "1.89"
 version = "1.0.0"
 

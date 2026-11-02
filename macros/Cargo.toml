@@ -1,10 +1,10 @@
 [package]
 name = "ignition-macros-rs"
 description = "Supporting macros for Ignition."
-documentation = "https://docs.rs/ignition-macros-rs"
+documentation = "https://docs.rs/ignition-rs"
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/diego-a-orellana/ignition"
+repository = "https://github.com/diego-a-orellana/ignition/tree/1.0.0"
 version = "1.0.0"
 
 [lib]
