@@ -8,8 +8,8 @@ format:
 
 .PHONY: clippy
 clippy:
-	cargo clippy --lib
+	cargo clippy --lib --features "download-onnxruntime,download-opencv"
 
 .PHONY: test
 test:
-	cargo test --lib -vv
+	IGNITION_BUCKET_URL=http://127.0.0.1 cargo test --no-default-features --features download --test retrieval

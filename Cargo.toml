@@ -30,7 +30,7 @@ tar = { version = "0.4", optional = true }
 ureq = { version = "2.12", optional = true }
 
 [features]
-default = ["download-onnxruntime", "download-opencv"]
+default = []
 # Asset retrieval, enabled by any `download-<asset>` feature
 download = ["dep:flate2", "dep:tar", "dep:ureq"]
 download-onnxruntime = ["download"]

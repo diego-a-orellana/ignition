@@ -32,7 +32,7 @@ Add Ignition as a **build dependency** of the crate that needs the assets:
 
 ```toml
 [build-dependencies]
-ignition = { git = "https://github.com/diego-a-orellana/ignition", version = "1.0" }
+ignition = "1.0.0"
 ```
 
 Then, in that crate's `build.rs`, set the environment variables for the assets you use:
@@ -95,6 +95,13 @@ Locally, archives are cached and extracted under the build directory:
 
 A cached archive is only ever a complete one: downloads are written to a `.part` file, checked
 against `Content-Length`, and renamed into place on success.
+
+Concurrent build-script invocations serialize each asset's cache check, download and extraction
+using an adjacent `<asset>.tar.gz.lock` file. The OS lock is released when the handle closes,
+including process termination; the lock file stays in place so all waiters use the same file.
+HEAD requests have a 30-second timeout and downloads a 300-second timeout.
+
+NOTE: Ignition requires Rust 1.89 or newer for standard-library file locking.
 
 ## Adding an asset
 
